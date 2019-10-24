@@ -25,13 +25,16 @@ module.exports = {
     'prettier'
   ],
   rules: {
-    'prettier/prettier' : 'error',
-    'react/jsx-filename-extension' : [
+    'prettier/prettier': 'error',
+    'react/jsx-filename-extension': [
       'warn', {
         extensions: ['.jsx', '.js']
       }
     ],
     'import/prefer-default-export': 'off',
-    'react/state-in-constructor': '0'
+    'react/state-in-constructor': 0,
+    "react/static-property-placement": ['error', 'property assignment', {
+      propTypes: 'static public field',
+    }]
   },
 };
