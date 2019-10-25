@@ -31,6 +31,7 @@ module.exports = {
         extensions: ['.jsx', '.js']
       }
     ],
+    'import/no-named-as-default': 0,
     'import/prefer-default-export': 'off',
     'react/state-in-constructor': 0,
     "react/static-property-placement": ['error', 'property assignment', {
