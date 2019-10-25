@@ -11,6 +11,7 @@ import {
   IssueList,
   IssueFilter,
   LoadingIssues,
+  Paginator,
 } from './styles';
 
 export default class Repository extends Component {
@@ -25,9 +26,10 @@ export default class Repository extends Component {
   state = {
     repository: {},
     issues: [],
+    filterIndex: 0,
+    page: 1,
     loading: true,
     loadingIssues: false,
-    filterIndex: 0,
     issuesFilter: [
       {
         name: 'Todos',
@@ -45,43 +47,63 @@ export default class Repository extends Component {
   };
 
   async componentDidMount() {
-    this.loadIssues();
-  }
-
-  loadIssues = async () => {
-    this.setState({ loadingIssues: true });
-
-    const { match } = this.props;
-
-    const repoName = decodeURIComponent(match.params.repository);
-
-    const { filterIndex, issuesFilter } = this.state;
-
     const [repository, issues] = await Promise.all([
-      api.get(`/repos/${repoName}`),
-      api.get(`/repos/${repoName}/issues`, {
-        params: {
-          state: issuesFilter[filterIndex].value,
-          per_page: 5,
-        },
-      }),
+      this.getRepositoryData(),
+      this.getIssuesData(),
     ]);
 
     this.setState({
+      loading: false,
       repository: repository.data,
       issues: issues.data,
-      loading: false,
+    });
+  }
+
+  getRepositoryData = () => {
+    const { match } = this.props;
+    const repoName = decodeURIComponent(match.params.repository);
+
+    return api.get(`/repos/${repoName}`);
+  };
+
+  getIssuesData = async () => {
+    const { match } = this.props;
+    const repoName = decodeURIComponent(match.params.repository);
+    const { filterIndex, issuesFilter, page } = this.state;
+
+    return api.get(`/repos/${repoName}/issues`, {
+      params: {
+        state: issuesFilter[filterIndex].value,
+        per_page: 5,
+        page,
+      },
+    });
+  };
+
+  loadIssues = async () => {
+    this.setState({ loadingIssues: true });
+    const issues = await this.getIssuesData();
+
+    this.setState({
+      issues: issues.data,
       loadingIssues: false,
     });
   };
 
-  onIssuesFilterSelected = filterIndex => {
+  handleIssueFilterChange = filterIndex => {
     this.setState({
       filterIndex,
+      page: 1,
     });
 
     this.loadIssues();
   };
+
+  handlePageChange(page) {
+    this.setState({ page, loadingIssues: true });
+
+    this.loadIssues();
+  }
 
   render() {
     const {
@@ -91,6 +113,7 @@ export default class Repository extends Component {
       issuesFilter,
       filterIndex,
       loadingIssues,
+      page = 1,
     } = this.state;
 
     if (loading) {
@@ -113,20 +136,18 @@ export default class Repository extends Component {
                 disabled={index === filterIndex}
                 key={filter.value}
                 type="button"
-                onClick={() => this.onIssuesFilterSelected(index)}
+                onClick={() => this.handleIssueFilterChange(index)}
               >
                 {filter.name}
               </button>
             ))}
           </IssueFilter>
 
-          {loadingIssues && (
+          {loadingIssues ? (
             <LoadingIssues loadingIssues={loadingIssues ? 1 : 0}>
               <FaSpinner size={20} />
             </LoadingIssues>
-          )}
-
-          {!loadingIssues &&
+          ) : (
             issues.map(issue => (
               <li key={String(issue.id)}>
                 <img src={issue.user.avatar_url} alt={issue.user.login} />
@@ -140,7 +161,25 @@ export default class Repository extends Component {
                   <p>{issue.user.login}</p>
                 </div>
               </li>
-            ))}
+            ))
+          )}
+
+          <Paginator>
+            <button
+              type="button"
+              disabled={page === 1}
+              onClick={() => this.handlePageChange(page - 1)}
+            >
+              Anterior
+            </button>
+            <span>{page}</span>
+            <button
+              type="button"
+              onClick={() => this.handlePageChange(page + 1)}
+            >
+              Próxima
+            </button>
+          </Paginator>
         </IssueList>
       </Container>
     );

@@ -1,4 +1,4 @@
-import styled, { keyframes, css } from 'styled-components';
+import styled, { keyframes } from 'styled-components';
 
 const rotate = keyframes`
   from {
@@ -48,7 +48,7 @@ export const Owner = styled.header`
     color: #666;
     line-height: 1.4;
     text-align: center;
-    max-width: 400px;
+    max-width: 403px;
   }
 `;
 
@@ -57,10 +57,6 @@ export const IssueList = styled.ul`
   margin-top: 30px;
   border-top: 1px solid #eee;
   list-style: none;
-
-  div.dropdown button {
-    color: black;
-  }
 
   li {
     display: flex;
@@ -128,6 +124,7 @@ export const IssueFilter = styled.div`
     padding: 8px;
     margin: 0 0.25rem;
     font-weight: 600;
+    color: #333;
 
     &[disabled] {
       cursor: not-allowed;
@@ -142,11 +139,40 @@ export const IssueFilter = styled.div`
 
 export const LoadingIssues = styled.div`
   display: flex;
-  align-items: center;
+  height: 200px;
   justify-content: center;
-  height: 100px;
+  align-items: center;
 
   svg {
     animation: ${rotate} 2s linear infinite;
+  }
+`;
+
+export const Paginator = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 15px;
+
+  button {
+    outline: 0;
+    border: 0;
+    padding: 8px;
+    margin: 0 0.25rem;
+    border-radius: 4px;
+    font-weight: 600;
+    color: #333;
+  }
+
+  button[disabled] {
+    cursor: not-allowed;
+    color: #969696;
+  }
+
+  span {
+    font-weight: bold;
+    color: #333;
+    border-bottom: 1px solid #999;
+    font-size: 1rem;
   }
 `;
