@@ -1,4 +1,14 @@
-import styled from 'styled-components';
+import styled, { keyframes, css } from 'styled-components';
+
+const rotate = keyframes`
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+`;
 
 export const Loading = styled.div`
   color: #fff;
@@ -43,7 +53,7 @@ export const Owner = styled.header`
 `;
 
 export const IssueList = styled.ul`
-  padding-top: 30px;
+  padding-top: 15px;
   margin-top: 30px;
   border-top: 1px solid #eee;
   list-style: none;
@@ -106,26 +116,37 @@ export const IssueList = styled.ul`
   }
 `;
 
-export const IssuesFilter = styled.select`
-  -webkit-appearance: button;
-  -moz-appearance: button;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -webkit-padding-end: 20px;
-  -moz-padding-end: 20px;
-  -webkit-padding-start: 2px;
-  -moz-padding-start: 2px;
-  background-color: #aaa;
-  width: 100%;
-  border: 1px solid #aaa;
-  border-radius: 2px;
-  box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.1);
-  color: #555;
-  font-size: inherit;
-  margin: 0;
-  overflow: hidden;
-  padding-top: 2px;
-  padding-bottom: 2px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+export const IssueFilter = styled.div`
+  display: flex;
+  justify-content: center;
+  margin-bottom: 15px;
+
+  button {
+    border-radius: 4px;
+    outline: 0;
+    border: 0;
+    padding: 8px;
+    margin: 0 0.25rem;
+    font-weight: 600;
+
+    &[disabled] {
+      cursor: not-allowed;
+    }
+
+    &:nth-child(${props => props.activeIndex}) {
+      background: #576574;
+      color: white;
+    }
+  }
+`;
+
+export const LoadingIssues = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100px;
+
+  svg {
+    animation: ${rotate} 2s linear infinite;
+  }
 `;

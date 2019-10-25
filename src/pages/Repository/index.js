@@ -1,11 +1,17 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
-import { DropdownButton, Dropdown } from 'react-bootstrap';
+import { FaSpinner } from 'react-icons/fa';
 import api from '../../services/api';
 
 import Container from '../components/Container';
-import { Loading, Owner, IssuesFilter, IssueList } from './styles';
+import {
+  Loading,
+  Owner,
+  IssueList,
+  IssueFilter,
+  LoadingIssues,
+} from './styles';
 
 export default class Repository extends Component {
   static propTypes = {
@@ -20,25 +26,43 @@ export default class Repository extends Component {
     repository: {},
     issues: [],
     loading: true,
-    issuesFilter: 'all',
+    loadingIssues: false,
+    filterIndex: 0,
+    issuesFilter: [
+      {
+        name: 'Todos',
+        value: 'all',
+      },
+      {
+        name: 'Abertos',
+        value: 'open',
+      },
+      {
+        name: 'Fechados',
+        value: 'closed',
+      },
+    ],
   };
 
   async componentDidMount() {
+    this.loadIssues();
+  }
+
+  loadIssues = async () => {
+    this.setState({ loadingIssues: true });
+
     const { match } = this.props;
 
-    const { issuesFilter } = this.state;
-
     const repoName = decodeURIComponent(match.params.repository);
+
+    const { filterIndex, issuesFilter } = this.state;
 
     const [repository, issues] = await Promise.all([
       api.get(`/repos/${repoName}`),
       api.get(`/repos/${repoName}/issues`, {
         params: {
-          state: 'open',
+          state: issuesFilter[filterIndex].value,
           per_page: 5,
-        },
-        query: {
-          state: issuesFilter,
         },
       }),
     ]);
@@ -47,34 +71,27 @@ export default class Repository extends Component {
       repository: repository.data,
       issues: issues.data,
       loading: false,
-    });
-  }
-
-  onIssuesFilterSelected = async value => {
-    this.setState({
-      issuesFilter: value,
-    });
-    // const { repository } = this.state;
-    // const repoName = repository.name;
-
-    const { match } = this.props;
-    const repoName = decodeURIComponent(match.params.repository);
-
-    const issues = await api.get(`/repos/${repoName}/issues`, {
-      params: {
-        state: value,
-        per_page: 5,
-      },
-    });
-
-    this.setState({
-      issues: issues.data,
-      loading: false,
+      loadingIssues: false,
     });
   };
 
+  onIssuesFilterSelected = filterIndex => {
+    this.setState({
+      filterIndex,
+    });
+
+    this.loadIssues();
+  };
+
   render() {
-    const { repository, issues, loading } = this.state;
+    const {
+      repository,
+      issues,
+      loading,
+      issuesFilter,
+      filterIndex,
+      loadingIssues,
+    } = this.state;
 
     if (loading) {
       return <Loading>Carregando</Loading>;
@@ -90,30 +107,40 @@ export default class Repository extends Component {
         </Owner>
 
         <IssueList>
-          <DropdownButton
-            id="dropdown-basic-button"
-            title="Dropdown button"
-            onSelect={this.onIssuesFilterSelected}
-          >
-            <Dropdown.Item eventKey="all">Todos</Dropdown.Item>
-            <Dropdown.Item eventKey="open">Abertos</Dropdown.Item>
-            <Dropdown.Item eventKey="closed">Fechados</Dropdown.Item>
-          </DropdownButton>
+          <IssueFilter activeIndex={filterIndex + 1}>
+            {issuesFilter.map((filter, index) => (
+              <button
+                disabled={index === filterIndex}
+                key={filter.value}
+                type="button"
+                onClick={() => this.onIssuesFilterSelected(index)}
+              >
+                {filter.name}
+              </button>
+            ))}
+          </IssueFilter>
 
-          {issues.map(issue => (
-            <li key={String(issue.id)}>
-              <img src={issue.user.avatar_url} alt={issue.user.login} />
-              <div>
-                <strong>
-                  <a href={issue.html_url}>{issue.title}</a>
-                  {issue.labels.map(label => (
-                    <span key={String(label.id)}>{label.name}</span>
-                  ))}
-                </strong>
-                <p>{issue.user.login}</p>
-              </div>
-            </li>
-          ))}
+          {loadingIssues && (
+            <LoadingIssues loadingIssues={loadingIssues ? 1 : 0}>
+              <FaSpinner size={20} />
+            </LoadingIssues>
+          )}
+
+          {!loadingIssues &&
+            issues.map(issue => (
+              <li key={String(issue.id)}>
+                <img src={issue.user.avatar_url} alt={issue.user.login} />
+                <div>
+                  <strong>
+                    <a href={issue.html_url}>{issue.title}</a>
+                    {issue.labels.map(label => (
+                      <span key={String(label.id)}>{label.name}</span>
+                    ))}
+                  </strong>
+                  <p>{issue.user.login}</p>
+                </div>
+              </li>
+            ))}
         </IssueList>
       </Container>
     );

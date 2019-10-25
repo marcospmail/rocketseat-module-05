@@ -44,7 +44,6 @@ export default class Main extends Component {
     try {
       const repoNameAlreadyExists = repositories.find(r => r.name === newRepo);
       if (repoNameAlreadyExists) {
-        this.setState({ openDialog: true });
         throw new Error('Repository already exists');
       }
 
@@ -65,7 +64,7 @@ export default class Main extends Component {
   };
 
   render() {
-    const { newRepo, loading, repositories, error, openDialog } = this.state;
+    const { newRepo, loading, repositories, error } = this.state;
 
     return (
       <Container>
