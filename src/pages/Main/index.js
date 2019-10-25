@@ -76,7 +76,7 @@ export default class Main extends Component {
         <Form onSubmit={this.handleSubmit}>
           <NewRepoInput
             value={newRepo}
-            vava={this.handleInputChange}
+            onChange={this.handleInputChange}
             error={error}
           />
 

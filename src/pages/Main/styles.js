@@ -70,7 +70,7 @@ export const NewRepoInput = styled.input.attrs(props => ({
   type: 'text',
   placeholder: 'Adicionar repositórios',
   value: props.value,
-  onChange: props.vava,
+  onChange: props.onChange,
 }))`
   flex: 1;
   border: 1px solid #eee;
